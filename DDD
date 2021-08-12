@@ -1,0 +1,67 @@
+XXXX-----1-----XXXXXXXXXXX
+
+Groceries:
+1, 25Kg, 2021, 1250
+2, 10Kg, 2020, 250
+1, 12Kg, 2020, 480
+5, 6Kg, 240, 2021
+6, 8Kg, 2021, Null
+2, 25Kg, 2021, 750
+7, 10Kg, 2021, 1300
+3, 1/2Kg, 2021, 10
+3, 12Kg, 2020, 300
+4, 1/2Lt, 2020, 20
+....
+..
+-- million entries --
+..
+.....
+4, 2Lt, 2021, 102
+1, 10Kg, 2019, 350
+
+Calculate price inflation for the groceries above.
+Output:
+Grocery	2019	2020	2021
+Rice	NA	14.2	25
+Wheat	NA	NA	20
+...
+Dal	NA	NA	NA
+
+
+val df=spark.read.file("File")
+df.createTempTable("table1")
+
+val DF1=spark.sql("select grocid,year,price/Quantity as actualcost from table1 order by year")
+val windowData=window.partitionby(grocid,year) over(actcost)
+val DF2=DF1.withcolumn("lead",lead()over(windowData))
+val DF3=DF2.selectExpr(grocid,year,actualcost,leadvalue,actualcost*leadvalue/100 as inflationPercentage)
+spark.sql("Select  grocerycode.name,case when  year='2019' then '2019',case when  year='2020' then '2020',case when  year='2021' then '2021' end,
+inflationPercentage
+ from DF3 join groccerycode on DF3.grocid=grocerycode.grocid")
+
+
+
+
+
+
+
+
+10 KG,12 KG
+350,480
+2019-35,420
+35 kg,
+480/12=40
+480-420=60
+
+
+Grocery code:
+Rice, 1
+Wheat, 2
+Salt, 3
+Ragi, 5
+Jowar, 6
+Dal, 7
+Milk, 4
+
+
+
